@@ -38,17 +38,18 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    <div className="columns-4 md:columns-5 lg:columns-6 xl:columns-7 2xl:columns-8 gap-0">
       {images.map((image, index) => (
-        <div key={image.id} className="relative aspect-square">
+        <div key={image.id} className="relative w-full break-inside-avoid mb-0">
           <Image
             src={image.signedUrl}
             alt={image.file_name || 'Uploaded image'}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-            style={{ objectFit: 'cover' }}
-            className="rounded"
+            width={500}
+            height={500}
+            sizes="(max-width: 768px) 25vw, (max-width: 1024px) 20vw, (max-width: 1280px) 16.66vw, (max-width: 1536px) 14.28vw, 12.5vw"
+            className="w-full h-auto"
             priority={index === 0}
+            onError={() => console.error(`Failed to load image: ${image.file_name}`)}
           />
         </div>
       ))}
