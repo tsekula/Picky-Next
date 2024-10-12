@@ -10,17 +10,9 @@ const nextConfig = {
         pathname: '/storage/v1/object/**',
       },
     ],
+    // Set the cache control for images
+    minimumCacheTTL: 60, // Minimum time to cache images in seconds
   },
 }
 
 module.exports = nextConfig
-
-// Enable source maps in development
-if (process.env.NODE_ENV === 'development') {
-  module.exports.webpack = (config, { dev, isServer }) => {
-    if (dev && !isServer) {
-      config.devtool = 'source-map'
-    }
-    return config
-  }
-}

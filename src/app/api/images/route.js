@@ -27,10 +27,16 @@ export async function GET(request) {
       .from('images')
       .createSignedUrl(image.file_path, 60 * 60) // URL valid for 1 hour
 
-    return { ...image, signedUrl }
+    // Return only the required fields
+    return { signedUrl, id: image.id, file_name: image.file_name, uploaded_at: image.uploaded_at }
+    //return { ...image, signedUrl }
   }))
 
-  return NextResponse.json(imagesWithUrls)
+  // Create a response without caching headers
+  const response = NextResponse.json(imagesWithUrls)
+  response.headers.set('Cache-Control', 'no-store, max-age=0')
+
+  return response
 }
 
 export async function POST(request) {
@@ -74,6 +80,25 @@ export async function DELETE(request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 
+  // Delete image from storage
+  const { data: image } = await supabase
+    .from('images')
+    .select('file_path')
+    .eq('id', id)
+    .single()
+
+  if (image) {
+    const { error: storageError } = await supabase
+      .storage
+      .from('images')
+      .remove([image.file_path])
+
+    if (storageError) {
+      console.error('Error deleting image from storage:', storageError)
+    }
+  }
+
+  // Delete image from database
   const { error } = await supabase
     .from('images')
     .delete()

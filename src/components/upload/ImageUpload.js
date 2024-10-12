@@ -33,11 +33,18 @@ export default function ImageUpload({ onUploadSuccess }) {
   }, [uploading])
 
   const uploadFiles = async (files) => {
-    setUploading(true)
-    setProgress(0)
-    const formData = new FormData()
+    setUploading(true);
+    setProgress(0);
+    const formData = new FormData();
+
     for (const file of files) {
-      formData.append('files', file)
+      if (file.type === 'image/heic') {
+        alert('HEIC files are not supported. Please select a different image format.');
+        setUploading(false);
+        setProgress(0);
+        return;
+      }
+      formData.append('files', file);
     }
 
     try {

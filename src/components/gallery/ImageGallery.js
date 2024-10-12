@@ -3,21 +3,24 @@
 import { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
 import Image from 'next/image'
 
-const ImageGallery = forwardRef(({ userId }, ref) => {
+const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
   const [images, setImages] = useState([])
   const [error, setError] = useState(null)
+  const [selectedImages, setSelectedImages] = useState([])
 
   const fetchImages = async () => {
     try {
-      const response = await fetch('/api/images')
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/images?t=${timestamp}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch images')
+        throw new Error('Failed to fetch images');
       }
-      const data = await response.json()
-      setImages(data)
+      const data = await response.json();
+      setImages(data);
+      setSelectedImages([]); // Clear selections when refreshing
     } catch (error) {
-      console.error('Error fetching images:', error)
-      setError('Failed to load images. Please try again later.')
+      console.error('Error fetching images:', error);
+      setError('Failed to load images. Please try again later.');
     }
   }
 
@@ -26,8 +29,41 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
   }, [])
 
   useImperativeHandle(ref, () => ({
-    refreshGallery: fetchImages
+    refreshGallery: fetchImages,
+    removeDeletedImages: (deletedIds) => {
+      setImages(prevImages => prevImages.filter(img => !deletedIds.includes(img.id)));
+    }
   }))
+
+  const handleCheckboxChange = (imageId) => {
+    setSelectedImages(prev => {
+      const newSelection = prev.includes(imageId) 
+        ? prev.filter(id => id !== imageId) 
+        : [...prev, imageId];
+      onSelectionChange(newSelection);
+      return newSelection;
+    });
+  }
+
+  const handleDelete = async () => {
+    try {
+      const response = await fetch('/api/images/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageIds: selectedImages }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete images')
+      }
+
+      fetchImages()
+      setSelectedImages([])
+    } catch (error) {
+      console.error('Error deleting images:', error)
+      setError('Failed to delete images. Please try again later.')
+    }
+  }
 
   if (error) {
     return <p className="text-center text-red-500">{error}</p>
@@ -38,19 +74,24 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
   }
 
   return (
-    <div className="columns-4 md:columns-5 lg:columns-6 xl:columns-7 2xl:columns-8 gap-0">
-      {images.map((image, index) => (
-        <div key={image.id} className="relative w-full break-inside-avoid mb-0">
-          <Image
+    <div className="grid grid-cols-4 gap-2 sm:gap-4">
+      {images.map((image) => (
+        <div key={image.id} className="relative group aspect-square">
+          <img
             src={image.signedUrl}
-            alt={image.file_name || 'Uploaded image'}
-            width={500}
-            height={500}
-            sizes="(max-width: 768px) 25vw, (max-width: 1024px) 20vw, (max-width: 1280px) 16.66vw, (max-width: 1536px) 14.28vw, 12.5vw"
-            className="w-full h-auto"
-            priority={index === 0}
-            onError={() => console.error(`Failed to load image: ${image.file_name}`)}
+            alt={image.file_name}
+            className="w-full h-full object-cover rounded-lg"
           />
+          <div className={`absolute top-2 left-2 z-10 transition-opacity duration-300 ${
+            selectedImages.includes(image.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}>
+            <input
+              type="checkbox"
+              checked={selectedImages.includes(image.id)}
+              onChange={() => handleCheckboxChange(image.id)}
+              className="form-checkbox h-4 w-4 sm:h-5 sm:w-5 text-blue-600 transition duration-150 ease-in-out bg-white bg-opacity-75 rounded"
+            />
+          </div>
         </div>
       ))}
     </div>

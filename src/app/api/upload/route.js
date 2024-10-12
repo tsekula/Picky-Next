@@ -1,7 +1,6 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import heicConvert from 'heic-convert';
 
 export async function POST(request) {
   const supabase = createRouteHandlerClient({ cookies });
@@ -20,24 +19,10 @@ export async function POST(request) {
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
 
-  async function convertHeicToJpeg(file) {
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const jpegBuffer = await heicConvert({
-      buffer: buffer,
-      format: 'JPEG',
-      quality: 0.9
-    });
-    return new File([jpegBuffer], file.name.replace(/\.heic$/i, '.jpg'), { type: 'image/jpeg' });
-  }
-
   (async () => {
     try {
       for (let i = 0; i < files.length; i++) {
-        let file = files[i];
-        if (file.name.toLowerCase().endsWith('.heic')) {
-          file = await convertHeicToJpeg(file);
-        }
+        const file = files[i];
 
         const fileName = `${Date.now()}_${file.name}`;
         const { data, error } = await supabase.storage
