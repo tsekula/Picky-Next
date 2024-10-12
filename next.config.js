@@ -10,8 +10,10 @@ const nextConfig = {
         pathname: '/storage/v1/object/**',
       },
     ],
-    // Set the cache control for images
-    minimumCacheTTL: 60, // Minimum time to cache images in seconds
+    minimumCacheTTL: 60,
+  },
+  experimental: {
+    serverComponentsExternalPackages: ['sharp'],
   },
 }
 

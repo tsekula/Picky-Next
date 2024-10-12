@@ -7,6 +7,7 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
   const [images, setImages] = useState([])
   const [error, setError] = useState(null)
   const [selectedImages, setSelectedImages] = useState([])
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   const fetchImages = async () => {
     try {
@@ -65,6 +66,14 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
     }
   }
 
+  const openLightbox = (image) => {
+    setLightboxImage(image);
+  };
+
+  const closeLightbox = () => {
+    setLightboxImage(null);
+  };
+
   if (error) {
     return <p className="text-center text-red-500">{error}</p>
   }
@@ -74,27 +83,45 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
   }
 
   return (
-    <div className="grid grid-cols-4 gap-2 sm:gap-4">
-      {images.map((image) => (
-        <div key={image.id} className="relative group aspect-square">
-          <img
-            src={image.signedUrl}
-            alt={image.file_name}
-            className="w-full h-full object-cover rounded-lg"
-          />
-          <div className={`absolute top-2 left-2 z-10 transition-opacity duration-300 ${
-            selectedImages.includes(image.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}>
-            <input
-              type="checkbox"
-              checked={selectedImages.includes(image.id)}
-              onChange={() => handleCheckboxChange(image.id)}
-              className="form-checkbox h-4 w-4 sm:h-5 sm:w-5 text-blue-600 transition duration-150 ease-in-out bg-white bg-opacity-75 rounded"
+    <>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        {images.map((image) => (
+          <div key={image.id} className="grid gap-4">
+            <div>
+              <img
+                className="h-auto max-w-full rounded-lg object-cover object-center"
+                src={image.thumbnailUrl}
+                alt={image.file_name}
+                loading="lazy"
+                onClick={() => openLightbox(image)}
+              />
+            </div>
+            <div className={`absolute top-2 left-2 z-10 transition-opacity duration-300 ${
+              selectedImages.includes(image.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}>
+              <input
+                type="checkbox"
+                checked={selectedImages.includes(image.id)}
+                onChange={() => handleCheckboxChange(image.id)}
+                className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out bg-white bg-opacity-75 rounded"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {lightboxImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={closeLightbox}>
+          <div className="max-w-4xl max-h-full p-4">
+            <img
+              src={lightboxImage.signedUrl}
+              alt={lightboxImage.file_name}
+              className="max-w-full max-h-full object-contain"
             />
           </div>
         </div>
-      ))}
-    </div>
+      )}
+    </>
   )
 })
 

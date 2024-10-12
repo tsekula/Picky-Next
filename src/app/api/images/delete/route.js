@@ -15,7 +15,7 @@ export async function POST(request) {
   // Fetch file paths before deletion
   const { data: filePaths, error: fetchError } = await supabase
     .from('images')
-    .select('file_path')
+    .select('file_path, thumbnail_path')  // Add thumbnail_path here
     .in('id', imageIds)
     .eq('user_id', session.user.id)
 
@@ -38,15 +38,20 @@ export async function POST(request) {
 
   // Delete files from storage
   const storageErrors = []
-  for (const { file_path } of filePaths) {
+  for (const { file_path, thumbnail_path } of filePaths) {
     const { error: storageError } = await supabase
       .storage
       .from('images')
-      .remove([file_path])
+      .remove([file_path]);
 
-    if (storageError) {
-      console.error(`Storage deletion error for ${file_path}:`, storageError)
-      storageErrors.push({ file_path, error: storageError.message })
+    const { error: thumbnailError } = await supabase
+      .storage
+      .from('thumbnails')
+      .remove([thumbnail_path]);
+
+    if (storageError || thumbnailError) {
+      console.error(`Deletion error for ${file_path}:`, storageError || thumbnailError);
+      storageErrors.push({ file_path, error: (storageError || thumbnailError).message });
     }
   }
 

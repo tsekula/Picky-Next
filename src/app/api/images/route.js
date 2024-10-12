@@ -27,9 +27,19 @@ export async function GET(request) {
       .from('images')
       .createSignedUrl(image.file_path, 60 * 60) // URL valid for 1 hour
 
+    const { data: { signedUrl: thumbnailUrl } } = await supabase
+      .storage
+      .from('thumbnails')
+      .createSignedUrl(image.thumbnail_path, 60 * 60)
+
     // Return only the required fields
-    return { signedUrl, id: image.id, file_name: image.file_name, uploaded_at: image.uploaded_at }
-    //return { ...image, signedUrl }
+    return { 
+      signedUrl, 
+      thumbnailUrl, 
+      id: image.id, 
+      file_name: image.file_name, 
+      uploaded_at: image.uploaded_at 
+    }
   }))
 
   // Create a response without caching headers
