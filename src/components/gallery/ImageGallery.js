@@ -2,26 +2,27 @@
 
 import { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
 import Image from 'next/image'
+import Masonry from 'react-masonry-css'
 
 const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
   const [images, setImages] = useState([])
   const [error, setError] = useState(null)
   const [selectedImages, setSelectedImages] = useState([])
-  const [lightboxImage, setLightboxImage] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState(null)
 
   const fetchImages = async () => {
     try {
-      const timestamp = new Date().getTime();
-      const response = await fetch(`/api/images?t=${timestamp}`);
+      const timestamp = new Date().getTime()
+      const response = await fetch(`/api/images?t=${timestamp}`)
       if (!response.ok) {
-        throw new Error('Failed to fetch images');
+        throw new Error('Failed to fetch images')
       }
-      const data = await response.json();
-      setImages(data);
-      setSelectedImages([]); // Clear selections when refreshing
+      const data = await response.json()
+      setImages(data)
+      setSelectedImages([]) // Clear selections when refreshing
     } catch (error) {
-      console.error('Error fetching images:', error);
-      setError('Failed to load images. Please try again later.');
+      console.error('Error fetching images:', error)
+      setError('Failed to load images. Please try again later.')
     }
   }
 
@@ -32,7 +33,7 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
   useImperativeHandle(ref, () => ({
     refreshGallery: fetchImages,
     removeDeletedImages: (deletedIds) => {
-      setImages(prevImages => prevImages.filter(img => !deletedIds.includes(img.id)));
+      setImages(prevImages => prevImages.filter(img => !deletedIds.includes(img.id)))
     }
   }))
 
@@ -40,10 +41,10 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
     setSelectedImages(prev => {
       const newSelection = prev.includes(imageId) 
         ? prev.filter(id => id !== imageId) 
-        : [...prev, imageId];
-      onSelectionChange(newSelection);
-      return newSelection;
-    });
+        : [...prev, imageId]
+      onSelectionChange(newSelection)
+      return newSelection
+    })
   }
 
   const handleDelete = async () => {
@@ -67,12 +68,12 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
   }
 
   const openLightbox = (image) => {
-    setLightboxImage(image);
-  };
+    setLightboxImage(image)
+  }
 
   const closeLightbox = () => {
-    setLightboxImage(null);
-  };
+    setLightboxImage(null)
+  }
 
   if (error) {
     return <p className="text-center text-red-500">{error}</p>
@@ -82,20 +83,30 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
     return <p className="text-center">No images yet! Upload some above!</p>
   }
 
+  const breakpointColumnsObj = {
+    default: 4,
+    1800: 8,
+    1100: 6,
+    700: 4,
+    500: 3
+  }
+
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <Masonry
+        breakpointCols={breakpointColumnsObj}
+        className="flex w-auto"
+        columnClassName="bg-clip-padding px-2"
+      >
         {images.map((image) => (
-          <div key={image.id} className="grid gap-4">
-            <div>
-              <img
-                className="h-auto max-w-full rounded-lg object-cover object-center"
-                src={image.thumbnailUrl}
-                alt={image.file_name}
-                loading="lazy"
-                onClick={() => openLightbox(image)}
-              />
-            </div>
+          <div key={image.id} className="mb-4 relative group">
+            <img
+              className="w-full rounded-lg object-cover object-center cursor-pointer transition-all duration-300 group-hover:opacity-75"
+              src={image.thumbnailUrl}
+              alt={image.file_name}
+              loading="lazy"
+              onClick={() => openLightbox(image)}
+            />
             <div className={`absolute top-2 left-2 z-10 transition-opacity duration-300 ${
               selectedImages.includes(image.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}>
@@ -108,7 +119,7 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
             </div>
           </div>
         ))}
-      </div>
+      </Masonry>
 
       {lightboxImage && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={closeLightbox}>

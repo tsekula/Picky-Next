@@ -1,4 +1,4 @@
-Tables in the database:
+Tables in the Supabase database:
 
 ```
 Schema for table: images
@@ -39,6 +39,14 @@ Columns:
     Type: USER-DEFINED
     Nullable: YES
     Default: None
+  thumbnail_path:
+    Type: text
+    Nullable: YES
+    Default: None
+  aspect_ratio:
+    Type: real
+    Nullable: YES
+    Default: '1'::real
 ----------------------------------------
 
 Schema for table: tags
