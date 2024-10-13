@@ -32,7 +32,6 @@ export async function GET(request) {
       .from('thumbnails')
       .createSignedUrl(image.thumbnail_path, 60 * 60)
 
-    // Return only the required fields
     return { 
       signedUrl, 
       thumbnailUrl, 
@@ -42,9 +41,8 @@ export async function GET(request) {
     }
   }))
 
-  // Create a response without caching headers
   const response = NextResponse.json(imagesWithUrls)
-  response.headers.set('Cache-Control', 'no-store, max-age=0')
+  response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400')
 
   return response
 }

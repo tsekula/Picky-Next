@@ -96,14 +96,17 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
       <Masonry
         breakpointCols={breakpointColumnsObj}
         className="flex w-auto"
-        columnClassName="bg-clip-padding px-2"
+        columnClassName="bg-clip-padding"
+        style={{ margin: '0 -2px' }}
       >
         {images.map((image) => (
-          <div key={image.id} className="mb-4 relative group">
-            <img
-              className="w-full rounded-lg object-cover object-center cursor-pointer transition-all duration-300 group-hover:opacity-75"
+          <div key={image.id} className="mb-4 relative group" style={{ padding: '0 4px' }}>
+            <Image
+              className="w-full rounded-sm object-cover object-center cursor-pointer transition-all duration-300 group-hover:opacity-75"
               src={image.thumbnailUrl}
               alt={image.file_name}
+              width={500}
+              height={500}
               loading="lazy"
               onClick={() => openLightbox(image)}
             />
