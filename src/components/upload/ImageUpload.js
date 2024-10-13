@@ -51,31 +51,22 @@ export default function ImageUpload({ onUploadSuccess }) {
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
-      })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to upload files')
+        throw new Error('Failed to upload files');
       }
 
-      const reader = response.body.getReader()
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const result = JSON.parse(new TextDecoder().decode(value))
-        setProgress(Math.round(result.progress * 100))
-      }
-
-      console.log('Files uploaded successfully')
-      onUploadSuccess()
+      const result = await response.json();
+      console.log('Files uploaded successfully');
+      onUploadSuccess(result.uploadedImages);
     } catch (error) {
-      console.error('Error uploading files:', error)
+      console.error('Error uploading files:', error);
     } finally {
-      setUploading(false)
-      setProgress(0)
+      setUploading(false);
+      setProgress(0);
     }
-  }
+  };
 
   return (
     <div

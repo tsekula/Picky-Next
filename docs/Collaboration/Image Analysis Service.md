@@ -7,32 +7,101 @@ The Image Analysis Service should be handled asynchronously from the image uploa
 
 ## High-Level Overview
 
-To accommodate the Image Analysis Service as an asynchronous process separate from the image upload, we'll need to make several changes to our application architecture. Here's a high-level overview of how we can update our app:
+The Image Analysis Service is designed to process images asynchronously, separate from the image upload process. This approach ensures a smooth user experience during upload while allowing for complex analysis tasks to be performed in the background.
+
+## Key Components
 
 1. **Image Upload Process**:
-   - Keep the current image upload process, but add a step to queue the uploaded image for analysis.
-   - After successful upload, add the image to an analysis queue instead of immediately triggering analysis.
+   - Remains largely unchanged, focusing on quick file transfer and storage.
+   - After successful upload, the image is queued for analysis instead of being processed immediately.
 
 2. **Analysis Queue**:
-   - Implement a queue system (e.g., using a database table or a message queue service) to store pending analysis tasks.
-   - Each queue item should contain the image ID and any necessary metadata.
+   - Implemented as a new table in our Supabase PostgreSQL database: `analysis_queue`.
+   - Each queue item contains the image ID, timestamp, and status.
 
 3. **Background Worker**:
-   - Create a background worker process that runs independently of the web application.
-   - This worker will continuously check the analysis queue for new tasks.
-   - When a task is found, the worker will perform the image analysis and update the database with the results.
+   - Runs as a separate process, possibly implemented as a serverless function or a dedicated microservice.
+   - Continuously polls the `analysis_queue` table for new tasks.
+   - Performs image analysis using AI models (specific models to be determined based on requirements).
 
-4. **Database Updates**:
-   - Add a new column to the `images` table to track the analysis status (e.g., 'pending', 'in_progress', 'completed', 'failed').
-   - Update the `analysis_results` table to include a timestamp for when the analysis was completed.
+4. **Database Schema Updates**:
+   - New `analysis_queue` table structure:
+     ```sql
+     CREATE TABLE analysis_queue (
+       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+       image_id UUID REFERENCES images(id),
+       status TEXT DEFAULT 'pending',
+       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+     );
+     ```
+   - Updated `images` table to include analysis status:
+     ```sql
+     ALTER TABLE images ADD COLUMN analysis_status TEXT DEFAULT 'pending';
+     ```
 
 5. **API Updates**:
-   - Modify the image upload API to add the newly uploaded image to the analysis queue.
-   - Create a new API endpoint to check the analysis status of an image.
+   - Modified `/api/upload` endpoint to add newly uploaded images to the analysis queue.
+   - New `/api/analysis/status` endpoint to check the analysis status of an image.
 
 6. **Frontend Updates**:
-   - Update the gallery view to show the analysis status for each image.
-   - Implement a way to refresh or poll for updated analysis results.
+   - Gallery view now displays analysis status for each image.
+   - Implemented polling mechanism to update analysis status periodically.
 
-This approach allows the image upload and refresh on the client app to happen independently of the image analysis process, improving the user experience and system scalability.
+## Implementation Details
 
+### Background Worker Process
+
+The background worker is implemented as a serverless function that runs on a schedule (e.g., every minute). It performs the following steps:
+
+1. Query the `analysis_queue` table for pending tasks.
+2. For each pending task:
+   - Update the status to 'in_progress'.
+   - Perform image analysis (object detection, text recognition, etc.).
+   - Store results in the `analysis_results` table.
+   - Update the image's `analysis_status` to 'completed'.
+   - Remove the task from the `analysis_queue`.
+
+### Analysis Results Storage
+
+Analysis results are stored in the `analysis_results` table:
+
+```sql
+CREATE TABLE analysis_results (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  image_id UUID REFERENCES images(id),
+  analysis_type TEXT NOT NULL,
+  result JSONB NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Frontend Integration
+
+The `ImageGallery` component has been updated to display analysis status:
+
+```javascript
+const ImageGallery = () => {
+  // ... existing code ...
+
+  useEffect(() => {
+    const pollAnalysisStatus = setInterval(async () => {
+      const updatedImages = await fetchImagesWithStatus();
+      setImages(updatedImages);
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(pollAnalysisStatus);
+  }, []);
+
+  // ... render code ...
+};
+```
+
+## Next Steps
+
+1. Finalize the selection of AI models for image analysis tasks.
+2. Implement error handling and retries in the background worker.
+3. Optimize the polling mechanism to reduce unnecessary API calls.
+4. Implement a user interface for viewing detailed analysis results.
+
+This asynchronous approach allows for scalable image processing without impacting the user experience during upload and browsing.
