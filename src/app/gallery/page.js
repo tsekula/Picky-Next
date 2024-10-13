@@ -71,6 +71,23 @@ export default function Gallery() {
     }
   };
 
+  const handleAnalyzeUnprocessed = async () => {
+    try {
+      const response = await fetch('/api/analysis/trigger', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to trigger analysis');
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+    } catch (error) {
+      console.error('Error triggering analysis:', error);
+    }
+  };
+
   if (!user) {
     return <div>Loading...</div>
   }
@@ -94,7 +111,7 @@ export default function Gallery() {
           </button>
           <button
             onClick={handleDeleteSelected}
-            className={`p-2 rounded-full ${
+            className={`p-2 rounded-full mr-2 ${
               selectedImages.length > 0
                 ? 'bg-red-500 hover:bg-red-700 text-white'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -105,6 +122,13 @@ export default function Gallery() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
+          </button>
+          <button
+            onClick={handleAnalyzeUnprocessed}
+            className="p-2 rounded-full bg-purple-500 hover:bg-purple-700 text-white mr-2"
+            aria-label="Analyze Unprocessed Images"
+          >
+            🪄
           </button>
         </div>
       </div>

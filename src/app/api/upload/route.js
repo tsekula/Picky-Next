@@ -52,7 +52,6 @@ export async function POST(request) {
 
     // Save image metadata to database
     const metadata = await sharp(buffer).metadata();
-    const aspectRatio = metadata.width / metadata.height;
 
     const { data: imageData, error: imageError } = await supabase
       .from('images')
@@ -62,8 +61,7 @@ export async function POST(request) {
         thumbnail_path: thumbData.path,
         file_name: file.name,
         file_size: file.size,
-        mime_type: file.type,
-        aspect_ratio: aspectRatio,
+        mime_type: file.type
       })
       .select();
 
@@ -77,7 +75,7 @@ export async function POST(request) {
       .from('analysis_queue')
       .insert({
         image_id: imageData[0].id,
-        status: 'pending'
+        status: 'not_started'
       });
 
     if (queueError) {

@@ -20,23 +20,16 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
       const data = await response.json()
       setImages(data)
       setSelectedImages([]) // Clear selections when refreshing
+      return data // Return the image data
     } catch (error) {
       console.error('Error fetching images:', error)
       setError('Failed to load images. Please try again later.')
+      return [] // Return an empty array in case of error
     }
   }
 
   useEffect(() => {
-    const fetchImagesAndStatus = async () => {
-      const imagesData = await fetchImages();
-      const imagesWithStatus = await Promise.all(imagesData.map(async (image) => {
-        const status = await fetchAnalysisStatus(image.id);
-        return { ...image, analysisStatus: status };
-      }));
-      setImages(imagesWithStatus);
-    };
-
-    fetchImagesAndStatus();
+    fetchImages()
   }, [])
 
   useImperativeHandle(ref, () => ({
@@ -119,9 +112,6 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
               loading="lazy"
               onClick={() => openLightbox(image)}
             />
-            <div className="absolute bottom-2 right-2 z-10 bg-white bg-opacity-75 px-2 py-1 rounded text-sm">
-              {image.analysisStatus}
-            </div>
             <div className={`absolute top-2 left-2 z-10 transition-opacity duration-300 ${
               selectedImages.includes(image.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}>
