@@ -2,6 +2,10 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+// Get the host and port from environment variables
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || 'http://localhost'
+const API_PORT = process.env.NEXT_PUBLIC_API_PORT || '3000'
+
 export async function POST(request) {
   const supabase = createRouteHandlerClient({ cookies })
   const { data: { session } } = await supabase.auth.getSession()
@@ -22,15 +26,19 @@ export async function POST(request) {
       throw fetchError
     }
 
+    // Construct the full URL for the analysis endpoint
+    const analysisUrl = `${API_HOST}:${API_PORT}/api/analysis`
+
     // Trigger analysis for each unprocessed image
-    // TODO: Fix the API call from backend   
     const analysisPromises = unprocessedImages.map(async (image) => {
-      const response = await fetch('/api/analysis', {
+      const response = await fetch(analysisUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({ image_id: image.id }),
+        credentials: 'include',
       })
 
       if (!response.ok) {

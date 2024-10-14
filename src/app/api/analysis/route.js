@@ -3,10 +3,15 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import sharp from 'sharp'
 import OpenAI from 'openai'
+import { createClient } from '@supabase/supabase-js'
+import { analyzeImage } from '../../../services/imageAnalysisService'
+import { retrieveAndResizeImage } from '../../../services/ImagePreprocessingService'
+import { saveAnalysisResults, updateImageAnalysisStatus } from '../../../services/analysisResultsService'
 
 export async function GET(request) {
   const supabase = createRouteHandlerClient({ cookies })
   const { data: { user }, error } = await supabase.auth.getUser()
+
 
   if (error || !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -28,86 +33,48 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const supabase = createRouteHandlerClient({ cookies })
-  const { data: { session } } = await supabase.auth.getSession()
+ 
+  // Get the token from the Authorization header
+  const authHeader = request.headers.get('Authorization')
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const token = authHeader.split(' ')[1]
 
-  if (!session) {
+  // Create a new Supabase client with the Bearer token
+  const supabaseWithToken = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  })
+
+  // Verify the token and get the user
+  const { data: { user }, error } = await supabaseWithToken.auth.getUser()
+  if (error || !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const { image_id } = await request.json()
 
   // Update analysis status to 'pending'
-  await supabase
-    .from('images')
-    .update({ analysis_status: 'pending' })
-    .eq('id', image_id)
+  await updateImageAnalysisStatus(supabaseWithToken, image_id, 'pending')
 
-  try {
-    // Retrieve the original image from storage
-    const { data: imageData, error: imageError } = await supabase
-      .storage
-      .from('images')
-      .download(`${image_id}`)
+  // Retrieve and resize the image
+  const resizedImage = await retrieveAndResizeImage(supabaseWithToken, image_id)
 
-    if (imageError) throw new Error('Error retrieving image')
+  // Analyze the image
+  const analysisResult = await analyzeImage(resizedImage.toString('base64'))
 
-    // Resize image if necessary
-    const resizedImage = await sharp(imageData)
-      .resize(768, 768, { fit: 'inside', withoutEnlargement: true })
-      .toBuffer()
+  // Save results to database
+  const savedResult = await saveAnalysisResults(supabaseWithToken, image_id, analysisResult)
 
-    // Initialize OpenAI client
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  // Update analysis status to 'complete'
+  await updateImageAnalysisStatus(supabaseWithToken, image_id, 'complete')
 
-    // Send image for analysis
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: "Analyze this image and provide the following information in JSON format: 1) Objects detected (including text, inanimate objects, people, landmarks), 2) Scene description, 3) Qualitative aspects (description of what the image is showing)" },
-            { type: "image_url", image_url: { url: `data:image/jpeg;base64,${resizedImage.toString('base64')}` } },
-          ],
-        },
-      ],
-      max_tokens: 500,
-    })
-
-    const analysisResult = JSON.parse(response.choices[0].message.content)
-
-    // Mock writing results to database
-    const { data, error } = await supabase
-      .from('analysis_results')
-      .insert({
-        image_id,
-        objects: analysisResult.objects,
-        scene: analysisResult.scene,
-        description: analysisResult.qualitative_aspects
-      })
-      .select()
-
-    if (error) throw new Error('Error saving analysis results')
-
-    // Update analysis status to 'complete'
-    await supabase
-      .from('images')
-      .update({ analysis_status: 'complete' })
-      .eq('id', image_id)
-
-    return NextResponse.json(data[0], { status: 201 })
-  } catch (error) {
-    console.error('Analysis error:', error)
-
-    // Update analysis status to 'failed' if there's an error
-    await supabase
-      .from('images')
-      .update({ analysis_status: 'failed' })
-      .eq('id', image_id)
-
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+  return NextResponse.json(savedResult, { status: 201 })
 }
 
 export async function DELETE(request) {
