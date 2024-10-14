@@ -46,7 +46,7 @@ Columns:
   analysis_status:
     Type: text
     Nullable: YES
-    Default: 'pending'::text
+    Default: 'unprocessed'::text
   objects:
     Type: ARRAY
     Nullable: YES
