@@ -1,3 +1,13 @@
+// OpenAI GPT model to be used for image analysis
+// Latest pricing: https://openai.com/api/pricing/
+export const imageAnalysisGPTModel = "gpt-4o";
+
+// # of pixels in the longer edge of the image to be processed
+export const imageAnalysisImageMaxLongEdge = 1536; 
+
+// # of tokens in the results
+export const imageAnalysisResultsMaxTokens = 500; 
+
 export const imageAnalysisPrompt = `
 Analyze this image and provide the following information:
 1) Objects detected (including text, inanimate objects, people, landmarks),

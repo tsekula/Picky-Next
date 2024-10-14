@@ -4,9 +4,7 @@ import { NextResponse } from 'next/server'
 import sharp from 'sharp'
 import OpenAI from 'openai'
 import { createClient } from '@supabase/supabase-js'
-import { analyzeImage } from '../../../services/imageAnalysisService'
-import { retrieveAndResizeImage } from '../../../services/ImagePreprocessingService'
-import { saveAnalysisResults, updateImageAnalysisStatus } from '../../../services/analysisResultsService'
+import { analyzeImage, retrieveAndResizeImage, updateImageAnalysisStatus, saveAnalysisResults } from '../../../services/imageAnalysisService'
 
 export async function GET(request) {
   const supabase = createRouteHandlerClient({ cookies })
@@ -60,7 +58,7 @@ export async function POST(request) {
   const { image_id } = await request.json()
 
   // Update analysis status to 'pending'
-  await updateImageAnalysisStatus(supabaseWithToken, image_id, 'pending')
+  //await updateImageAnalysisStatus(supabaseWithToken, image_id, 'pending')
 
   // Retrieve and resize the image
   const resizedImage = await retrieveAndResizeImage(supabaseWithToken, image_id)
@@ -69,12 +67,13 @@ export async function POST(request) {
   const analysisResult = await analyzeImage(resizedImage.toString('base64'))
 
   // Save results to database
-  const savedResult = await saveAnalysisResults(supabaseWithToken, image_id, analysisResult)
+  //const savedResult = await saveAnalysisResults(supabaseWithToken, image_id, analysisResult)
 
   // Update analysis status to 'complete'
-  await updateImageAnalysisStatus(supabaseWithToken, image_id, 'complete')
+  //await updateImageAnalysisStatus(supabaseWithToken, image_id, 'complete')
 
-  return NextResponse.json(savedResult, { status: 201 })
+  //return NextResponse.json(savedResult, { status: 201 })
+  return NextResponse.json({ status: 201 })
 }
 
 export async function DELETE(request) {
