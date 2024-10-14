@@ -14,6 +14,7 @@ export default function Gallery() {
   const [user, setUser] = useState(null)
   const [showUpload, setShowUpload] = useState(false)
   const [selectedImages, setSelectedImages] = useState([])
+  const [images, setImages] = useState([])
   const galleryRef = useRef(null)
 
   useEffect(() => {
@@ -28,11 +29,11 @@ export default function Gallery() {
     checkUser()
   }, [supabase, router])
 
-  const handleUploadSuccess = () => {
+  const handleUploadSuccess = async (newImages) => {
     if (galleryRef.current) {
-      galleryRef.current.refreshGallery()
+      galleryRef.current.addNewImages(newImages);
     }
-    setShowUpload(false)
+    setShowUpload(false);
   }
 
   const handleSelectionChange = useCallback((newSelection) => {

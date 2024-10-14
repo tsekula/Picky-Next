@@ -17,6 +17,7 @@ Analyze this image and provide the following information:
 1) Objects detected (including text, inanimate objects, people, landmarks),
 2) Scene description,
 3) Qualitative aspects (description of what the image is showing).
+If there are no people visible, do not mention this, return an empty list.
 `;
 
 export const imageAnalysisSchema = {
@@ -31,7 +32,7 @@ export const imageAnalysisSchema = {
           inanimate_objects: {
             type: "array",
             items: { type: "string" },
-            description: "List of inanimate objects detected in the image."
+            description: "Comprehensive list of noticeable inanimate objects detected in the image."
           },
           text: {
             type: "array",
@@ -40,12 +41,12 @@ export const imageAnalysisSchema = {
           },
           people: {
             type: "string",
-            description: "Description of people detected in the image."
+            description: "Keyword list describing people detected in the image."
           },
           landmarks: {
             type: "array",
             items: { type: "string" },
-            description: "List of landmarks detected in the image."
+            description: "Keyword list of landmarks detected in the image."
           }
         },
         required: ["inanimate_objects", "text", "people", "landmarks"],
@@ -53,11 +54,11 @@ export const imageAnalysisSchema = {
       },
       scene_description: {
         type: "string",
-        description: "A detailed description of the scene in the image."
+        description: "A keyword list of the description of the scene in the image."
       },
       qualitative_aspects: {
         type: "string",
-        description: "Qualitative aspects and overall impression of the image."
+        description: "A keyword list of the qualitative aspects and overall impression of the image."
       }
     },
     required: ["objects_detected", "scene_description", "qualitative_aspects"],

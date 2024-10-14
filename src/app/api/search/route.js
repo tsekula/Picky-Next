@@ -29,7 +29,7 @@ export async function GET(request) {
   const { data, error: searchError } = await supabase.rpc('match_images', {
     query_embedding: embedding,
     match_threshold: 0.8,
-    match_count: 20,
+    match_count: 80,
     current_user_id: user.id
   })
 

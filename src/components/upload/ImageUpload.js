@@ -59,7 +59,11 @@ export default function ImageUpload({ onUploadSuccess }) {
 
       const result = await response.json();
       console.log('Files uploaded successfully');
-      onUploadSuccess(result.uploadedImages);
+      if (result.uploadedImages && result.uploadedImages.length > 0) {
+        onUploadSuccess(result.uploadedImages);
+      } else {
+        console.error('No uploaded images returned from the server');
+      }
     } catch (error) {
       console.error('Error uploading files:', error);
     } finally {

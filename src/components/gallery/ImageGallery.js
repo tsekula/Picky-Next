@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Masonry from 'react-masonry-css'
 
 const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages }, ref) => {
-  const [images, setImages] = useState(propImages || [])
+  const [images, setImages] = useState([])
   const [filteredImages, setFilteredImages] = useState([])
   const [isFiltered, setIsFiltered] = useState(false)
   const [error, setError] = useState(null)
@@ -20,9 +20,9 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages
       }
       const data = await response.json()
       setImages(data)
-      setFilteredImages([]) // Clear filtered images
-      setIsFiltered(false) // Reset filter state
-      setSelectedImages([]) // Clear selections when refreshing
+      setFilteredImages([])
+      setIsFiltered(false)
+      setSelectedImages([])
       return data
     } catch (error) {
       console.error('Error fetching images:', error)
@@ -32,17 +32,14 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages
   }
 
   useEffect(() => {
-    if (propImages) {
-      setImages(propImages)
-      setFilteredImages([])
-      setIsFiltered(false)
-    } else {
-      fetchImages()
-    }
-  }, [propImages])
+    fetchImages()
+  }, [])
 
   useImperativeHandle(ref, () => ({
     refreshGallery: fetchImages,
+    addNewImages: (newImages) => {
+      setImages(prevImages => [...newImages, ...prevImages])
+    },
     removeDeletedImages: (deletedIds) => {
       setImages(prevImages => {
         const updatedImages = prevImages.filter(img => !deletedIds.includes(img.id));
