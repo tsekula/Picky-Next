@@ -2,6 +2,10 @@
 // Latest pricing: https://openai.com/api/pricing/
 export const imageAnalysisGPTModel = "gpt-4o";
 
+// OpenAI embedding model for generating vector representations
+export const embeddingModel = "text-embedding-ada-002";
+//export const embeddingDimension = 1536;
+
 // # of pixels in the longer edge of the image to be processed
 export const imageAnalysisImageMaxLongEdge = 1536; 
 

@@ -10,7 +10,7 @@
 
 import OpenAI from 'openai';
 import sharp from 'sharp';
-import { imageAnalysisPrompt, imageAnalysisSchema, imageAnalysisGPTModel, imageAnalysisImageMaxLongEdge, imageAnalysisResultsMaxTokens } from '../config/llmprompts';
+import { imageAnalysisPrompt, imageAnalysisSchema, imageAnalysisGPTModel, imageAnalysisImageMaxLongEdge, imageAnalysisResultsMaxTokens, embeddingModel, embeddingDimension } from '../config/llmconfig';
 
 /**
  * Analyzes an image using OpenAI's GPT-4 vision model
@@ -64,23 +64,43 @@ export async function updateImageAnalysisStatus(supabaseClient, image_id, status
     }
 }
 
-/**
- * Saves the analysis results for an image in the database
- * @param {Object} supabaseClient - Supabase client instance
- * @param {string} image_id - ID of the image in the database
- * @param {Object} analysisResult - Analysis results to be saved
- * @returns {Object} Saved analysis result data
- * @throws {Error} If saving fails
- */
+function prepareTextRepresentation(analysisResult) {
+    const textParts = [
+        analysisResult.objects_detected.inanimate_objects.join(", "),
+        analysisResult.objects_detected.text.join(", "),
+        analysisResult.objects_detected.people,
+        analysisResult.scene_description,
+        analysisResult.qualitative_aspects
+    ];
+    return textParts.filter(Boolean).join(" ");
+}
+
+async function generateEmbedding(text) {
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const response = await openai.embeddings.create({
+        model: embeddingModel,
+        input: text,
+    });
+    return response.data[0].embedding;
+}
+
 export async function saveAnalysisResults(supabaseClient, image_id, analysisResult) {
+    const textRepresentation = prepareTextRepresentation(analysisResult);
+    const embedding = await generateEmbedding(textRepresentation);
+
     const { data, error } = await supabaseClient
-        .from('analysis_results')
-        .insert({
-            image_id,
-            objects: analysisResult.objects_detected,
-            scene: analysisResult.scene_description,
-            description: analysisResult.qualitative_aspects
+        .from('images')
+        .update({
+            embedding: embedding,  // This is now a 1536-dimensional vector
+            objects: analysisResult.objects_detected.inanimate_objects,
+            text_detected: analysisResult.objects_detected.text,
+            people: analysisResult.objects_detected.people,
+            landmarks: analysisResult.objects_detected.landmarks,
+            scene_description: analysisResult.scene_description,
+            qualitative_aspects: analysisResult.qualitative_aspects,
+            last_analyzed: new Date().toISOString()
         })
+        .eq('id', image_id)
         .select();
 
     if (error) {

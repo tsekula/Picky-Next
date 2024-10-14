@@ -2,13 +2,12 @@
 
 import { useState } from 'react'
 
-export default function SearchBar() {
+export default function SearchBar({ onSearch }) {
   const [searchQuery, setSearchQuery] = useState('')
 
   const handleSearch = (e) => {
     e.preventDefault()
-    // TODO: Implement search functionality
-    console.log('Searching for:', searchQuery)
+    onSearch(searchQuery)
   }
 
   return (

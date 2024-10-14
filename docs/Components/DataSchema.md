@@ -43,10 +43,34 @@ Columns:
     Type: text
     Nullable: YES
     Default: None
-  aspect_ratio:
-    Type: real
+  analysis_status:
+    Type: text
     Nullable: YES
-    Default: '1'::real
+    Default: 'pending'::text
+  objects:
+    Type: ARRAY
+    Nullable: YES
+    Default: None
+  text_detected:
+    Type: ARRAY
+    Nullable: YES
+    Default: None
+  people:
+    Type: text
+    Nullable: YES
+    Default: None
+  landmarks:
+    Type: ARRAY
+    Nullable: YES
+    Default: None
+  scene_description:
+    Type: text
+    Nullable: YES
+    Default: None
+  qualitative_aspects:
+    Type: text
+    Nullable: YES
+    Default: None
 ----------------------------------------
 
 Schema for table: tags
@@ -127,5 +151,37 @@ Columns:
     Type: boolean
     Nullable: YES
     Default: false
+----------------------------------------
+
+Schema for table: analysis_queue
+Columns:
+  id:
+    Type: uuid
+    Nullable: NO
+    Default: uuid_generate_v4()
+  image_id:
+    Type: uuid
+    Nullable: YES
+    Default: None
+  status:
+    Type: text
+    Nullable: YES
+    Default: 'pending'::text
+  priority:
+    Type: integer
+    Nullable: YES
+    Default: 0
+  error_message:
+    Type: text
+    Nullable: YES
+    Default: None
+  created_at:
+    Type: timestamp with time zone
+    Nullable: YES
+    Default: CURRENT_TIMESTAMP
+  updated_at:
+    Type: timestamp with time zone
+    Nullable: YES
+    Default: CURRENT_TIMESTAMP
 ----------------------------------------
 ```

@@ -57,23 +57,29 @@ export async function POST(request) {
 
   const { image_id } = await request.json()
 
-  // Update analysis status to 'pending'
-  //await updateImageAnalysisStatus(supabaseWithToken, image_id, 'pending')
+  try {
+    console.log('Processing image:', image_id);
+    // Update analysis status to 'pending'
+    await updateImageAnalysisStatus(supabaseWithToken, image_id, 'pending')
 
-  // Retrieve and resize the image
-  const resizedImage = await retrieveAndResizeImage(supabaseWithToken, image_id)
+    // Retrieve and resize the image
+    const resizedImage = await retrieveAndResizeImage(supabaseWithToken, image_id)
 
-  // Analyze the image
-  const analysisResult = await analyzeImage(resizedImage.toString('base64'))
+    // Analyze the image
+    const analysisResult = await analyzeImage(resizedImage.toString('base64'))
 
-  // Save results to database
-  //const savedResult = await saveAnalysisResults(supabaseWithToken, image_id, analysisResult)
+    // Save results to database
+    const savedResult = await saveAnalysisResults(supabaseWithToken, image_id, analysisResult)
 
-  // Update analysis status to 'complete'
-  //await updateImageAnalysisStatus(supabaseWithToken, image_id, 'complete')
+    // Update analysis status to 'complete'
+    await updateImageAnalysisStatus(supabaseWithToken, image_id, 'complete')
 
-  //return NextResponse.json(savedResult, { status: 201 })
-  return NextResponse.json({ status: 201 })
+    return NextResponse.json(savedResult, { status: 201 })
+  } catch (error) {
+    console.error('Error processing image analysis:', error)
+    await updateImageAnalysisStatus(supabaseWithToken, image_id, 'failed')
+    return NextResponse.json({ error: 'Failed to process image analysis' }, { status: 500 })
+  }
 }
 
 export async function DELETE(request) {

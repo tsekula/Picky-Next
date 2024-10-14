@@ -71,7 +71,7 @@ export async function POST(request) {
     }
 
     // Instead of immediate analysis, queue the image for analysis
-    const { data: queueData, error: queueError } = await supabase
+/*     const { data: queueData, error: queueError } = await supabase
       .from('analysis_queue')
       .insert({
         image_id: imageData[0].id,
@@ -80,7 +80,7 @@ export async function POST(request) {
 
     if (queueError) {
       console.error('Error queueing image for analysis:', queueError);
-    }
+    } */
 
     uploadedImages.push(imageData[0]);
   }

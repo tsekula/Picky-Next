@@ -1,45 +1,68 @@
 'use client'
 
-import { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react'
 import Image from 'next/image'
 import Masonry from 'react-masonry-css'
 
-const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
-  const [images, setImages] = useState([])
+const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages }, ref) => {
+  const [images, setImages] = useState(propImages || [])
+  const [filteredImages, setFilteredImages] = useState([])
+  const [isFiltered, setIsFiltered] = useState(false)
   const [error, setError] = useState(null)
   const [selectedImages, setSelectedImages] = useState([])
   const [lightboxImage, setLightboxImage] = useState(null)
 
   const fetchImages = async () => {
     try {
-      const timestamp = new Date().getTime()
-      const response = await fetch(`/api/images?t=${timestamp}`)
+      const response = await fetch(`/api/images`)
       if (!response.ok) {
         throw new Error('Failed to fetch images')
       }
       const data = await response.json()
       setImages(data)
+      setFilteredImages([]) // Clear filtered images
+      setIsFiltered(false) // Reset filter state
       setSelectedImages([]) // Clear selections when refreshing
-      return data // Return the image data
+      return data
     } catch (error) {
       console.error('Error fetching images:', error)
       setError('Failed to load images. Please try again later.')
-      return [] // Return an empty array in case of error
+      return []
     }
   }
 
   useEffect(() => {
-    fetchImages()
-  }, [])
+    if (propImages) {
+      setImages(propImages)
+      setFilteredImages([])
+      setIsFiltered(false)
+    } else {
+      fetchImages()
+    }
+  }, [propImages])
 
   useImperativeHandle(ref, () => ({
     refreshGallery: fetchImages,
     removeDeletedImages: (deletedIds) => {
-      setImages(prevImages => prevImages.filter(img => !deletedIds.includes(img.id)))
+      setImages(prevImages => {
+        const updatedImages = prevImages.filter(img => !deletedIds.includes(img.id));
+        setFilteredImages(prevFiltered => prevFiltered.filter(img => !deletedIds.includes(img.id)));
+        return updatedImages;
+      });
+      setIsFiltered(false); // Reset the filter state
+    },
+    filterImages: (searchResults) => {
+      const filteredIds = new Set(searchResults.map(img => img.id))
+      setFilteredImages(images.filter(img => filteredIds.has(img.id)))
+      setIsFiltered(true)
+    },
+    clearFilter: () => {
+      setFilteredImages([])
+      setIsFiltered(false)
     }
   }))
 
-  const handleCheckboxChange = (imageId) => {
+  const handleCheckboxChange = useCallback((imageId) => {
     setSelectedImages(prev => {
       const newSelection = prev.includes(imageId) 
         ? prev.filter(id => id !== imageId) 
@@ -47,27 +70,7 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
       onSelectionChange(newSelection)
       return newSelection
     })
-  }
-
-  const handleDelete = async () => {
-    try {
-      const response = await fetch('/api/images/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageIds: selectedImages }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete images')
-      }
-
-      fetchImages()
-      setSelectedImages([])
-    } catch (error) {
-      console.error('Error deleting images:', error)
-      setError('Failed to delete images. Please try again later.')
-    }
-  }
+  }, [onSelectionChange])
 
   const openLightbox = (image) => {
     setLightboxImage(image)
@@ -101,7 +104,7 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange }, ref) => {
         columnClassName="bg-clip-padding"
         style={{ margin: '0 -2px' }}
       >
-        {images.map((image) => (
+        {(isFiltered ? filteredImages : images).map((image) => (
           <div key={image.id} className="mb-4 relative group" style={{ padding: '0 4px' }}>
             <Image
               className="w-full rounded-sm object-cover object-center cursor-pointer transition-all duration-300 group-hover:opacity-75"

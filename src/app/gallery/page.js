@@ -1,7 +1,7 @@
 'use client'
 
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import TopNavBar from '@/components/layout/TopNavBar'
 import SearchBar from '@/components/search/SearchBar'
@@ -35,6 +35,10 @@ export default function Gallery() {
     setShowUpload(false)
   }
 
+  const handleSelectionChange = useCallback((newSelection) => {
+    setSelectedImages(newSelection)
+  }, [])
+
   const handleDeleteSelected = async () => {
     if (selectedImages.length > 0) {
       try {
@@ -51,16 +55,12 @@ export default function Gallery() {
         const result = await response.json();
         console.log(result.message);
 
-        // Immediately remove deleted images from the state
-        if (galleryRef.current) {
-          galleryRef.current.removeDeletedImages(selectedImages);
-        }
-
         // Clear the selected images
         setSelectedImages([]);
 
-        // Refresh the gallery
+        // Refresh the gallery after the state has been cleared
         if (galleryRef.current) {
+          galleryRef.current.removeDeletedImages(selectedImages);
           await galleryRef.current.refreshGallery();
         }
 
@@ -88,6 +88,28 @@ export default function Gallery() {
     }
   };
 
+  const handleSearch = async (query) => {
+    try {
+      if (query.trim() === '') {
+        // If the search query is empty, clear the filter
+        if (galleryRef.current) {
+          galleryRef.current.clearFilter()
+        }
+      } else {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
+        if (!response.ok) {
+          throw new Error('Search failed')
+        }
+        const searchResults = await response.json()
+        if (galleryRef.current) {
+          galleryRef.current.filterImages(searchResults)
+        }
+      }
+    } catch (error) {
+      console.error('Error searching images:', error)
+    }
+  }
+
   if (!user) {
     return <div>Loading...</div>
   }
@@ -98,7 +120,7 @@ export default function Gallery() {
       <div className="bg-gray-100 p-4">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex-grow mr-4">
-            <SearchBar />
+            <SearchBar onSearch={handleSearch} />
           </div>
           <button
             onClick={() => setShowUpload(!showUpload)}
@@ -141,7 +163,7 @@ export default function Gallery() {
         <ImageGallery 
           ref={galleryRef} 
           userId={user.id} 
-          onSelectionChange={setSelectedImages}
+          onSelectionChange={handleSelectionChange}
         />
       </main>
     </div>
