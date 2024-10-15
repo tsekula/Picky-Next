@@ -63,7 +63,11 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
   }))
 
   const handleUploadSuccess = async (newImages) => {
-    setImages(prevImages => [...newImages, ...prevImages]);
+    const processedImages = newImages.map(img => ({
+      ...img,
+      thumbnailUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/thumbnails/${img.thumbnail_path}`
+    }));
+    setImages(prevImages => [...processedImages, ...prevImages]);
     setShowUpload(false);
   }
 
@@ -239,6 +243,8 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
               height={500}
               loading="lazy"
               onClick={() => openLightbox(image)}
+              priority={false}
+              unoptimized={false}
             />
             <div className={`absolute top-2 left-2 z-10 transition-opacity duration-300 ${
               selectedImages.includes(image.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'

@@ -48,25 +48,41 @@ export default function ImageUpload({ onUploadSuccess }) {
     }
 
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload');
+      
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          setProgress(percentComplete);
+        }
+      };
 
-      if (!response.ok) {
-        throw new Error('Failed to upload files');
-      }
+      xhr.onload = async function() {
+        if (xhr.status === 200) {
+          const result = JSON.parse(xhr.responseText);
+          console.log('Files uploaded successfully');
+          if (result.uploadedImages && result.uploadedImages.length > 0) {
+            onUploadSuccess(result.uploadedImages);
+          } else {
+            console.error('No uploaded images returned from the server');
+          }
+        } else {
+          console.error('Upload failed');
+        }
+        setUploading(false);
+        setProgress(0);
+      };
 
-      const result = await response.json();
-      console.log('Files uploaded successfully');
-      if (result.uploadedImages && result.uploadedImages.length > 0) {
-        onUploadSuccess(result.uploadedImages);
-      } else {
-        console.error('No uploaded images returned from the server');
-      }
+      xhr.onerror = function() {
+        console.error('Error uploading files');
+        setUploading(false);
+        setProgress(0);
+      };
+
+      xhr.send(formData);
     } catch (error) {
       console.error('Error uploading files:', error);
-    } finally {
       setUploading(false);
       setProgress(0);
     }
@@ -77,36 +93,30 @@ export default function ImageUpload({ onUploadSuccess }) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`border-2 border-dashed p-8 text-center cursor-pointer ${
+      className={`border-2 border-dashed p-8 text-center ${
         dragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-      } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+      }`}
     >
       {uploading ? (
         <div>
-          <p>Uploading... {progress}%</p>
+          <p>Uploading... {progress.toFixed(0)}%</p>
           <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
-            <div 
-              className="bg-blue-600 h-2.5 rounded-full" 
-              style={{width: `${progress}%`}}
-            ></div>
+            <div className="bg-blue-600 h-2.5 rounded-full" style={{width: `${progress}%`}}></div>
           </div>
         </div>
       ) : (
         <>
-          <p>Drag 'n' drop some images here, or click to select files</p>
+          <p>Drag and drop images here, or click to select files</p>
           <input
             type="file"
             multiple
             onChange={handleFileInput}
             className="hidden"
             id="fileInput"
-            disabled={uploading}
           />
           <label
             htmlFor="fileInput"
-            className={`mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded cursor-pointer ${
-              uploading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded cursor-pointer"
           >
             Select Files
           </label>
