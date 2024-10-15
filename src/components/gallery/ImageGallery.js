@@ -69,8 +69,18 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages
     })
   }, [onSelectionChange])
 
-  const openLightbox = (image) => {
-    setLightboxImage(image)
+  const openLightbox = async (image) => {
+    try {
+      const response = await fetch(`/api/images?id=${image.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch image details');
+      }
+      const imageDetails = await response.json();
+      setLightboxImage({ ...image, ...imageDetails });
+    } catch (error) {
+      console.error('Error fetching image details:', error);
+      setLightboxImage(image);
+    }
   }
 
   const closeLightbox = () => {
@@ -128,12 +138,70 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages
 
       {lightboxImage && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={closeLightbox}>
-          <div className="max-w-4xl max-h-full p-4">
-            <img
-              src={lightboxImage.signedUrl}
-              alt={lightboxImage.file_name}
-              className="max-w-full max-h-full object-contain"
-            />
+          <div className="max-w-7xl max-h-full p-4 flex">
+            <div className="w-2/3 pr-4">
+              <img
+                src={lightboxImage.signedUrl}
+                alt={lightboxImage.file_name}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+            <div className="w-1/3 bg-white text-black p-4 overflow-y-auto text-sm">
+              {lightboxImage.objects && (
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold">Objects Detected:</h3>
+                  <ul className="list-disc list-inside">
+                    {lightboxImage.objects.map((obj, index) => (
+                      <li key={index}>{obj}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {lightboxImage.text_detected && lightboxImage.text_detected.length > 0 && (
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold">Text Detected:</h3>
+                  <ul className="list-disc list-inside">
+                    {lightboxImage.text_detected.map((text, index) => (
+                      <li key={index}>{text}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {lightboxImage.people && (
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold">People:</h3>
+                  <p>{lightboxImage.people}</p>
+                </div>
+              )}
+              {lightboxImage.landmarks && lightboxImage.landmarks.length > 0 && (
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold">Landmarks:</h3>
+                  <ul className="list-disc list-inside">
+                    {lightboxImage.landmarks.map((landmark, index) => (
+                      <li key={index}>{landmark}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {lightboxImage.scene_description && (
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold">Scene Description:</h3>
+                  <p>{lightboxImage.scene_description}</p>
+                </div>
+              )}
+              {lightboxImage.qualitative_aspects && (
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold">Qualitative Aspects:</h3>
+                  <p>{lightboxImage.qualitative_aspects}</p>
+                </div>
+              )}
+              <div className="mt-6 pt-3 border-t border-gray-200">
+                <h2 className="text-xl font-bold mb-2">{lightboxImage.file_name}</h2>
+                <p><strong>Uploaded:</strong> {new Date(lightboxImage.uploaded_at).toLocaleString()}</p>
+                <p><strong>File Size:</strong> {(lightboxImage.file_size / 1024 / 1024).toFixed(2)} MB</p>
+                <p><strong>MIME Type:</strong> {lightboxImage.mime_type}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

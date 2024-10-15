@@ -10,40 +10,60 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data, error } = await supabase
-    .from('images')
-    .select('*')
-    .eq('user_id', session.user.id)
-    .order('uploaded_at', { ascending: false })
+  const { searchParams } = new URL(request.url)
+  const imageId = searchParams.get('id')
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  // Generate signed URLs for each image
-  const imagesWithUrls = await Promise.all(data.map(async (image) => {
-    const { data: { signedUrl } } = await supabase
-      .storage
+  if (imageId) {
+    // Handle single image request
+    const { data, error } = await supabase
       .from('images')
-      .createSignedUrl(image.file_path, 60 * 60) // URL valid for 1 hour
+      .select('*')
+      .eq('id', imageId)
+      .eq('user_id', session.user.id)
+      .single()
 
-    const { data: { signedUrl: thumbnailUrl } } = await supabase
-      .storage
-      .from('thumbnails')
-      .createSignedUrl(image.thumbnail_path, 60 * 60)
-
-    return { 
-      signedUrl, 
-      thumbnailUrl, 
-      id: image.id, 
-      file_name: image.file_name, 
-      uploaded_at: image.uploaded_at 
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
-  }))
 
-  const response = NextResponse.json(imagesWithUrls)
-  response.headers.set('Cache-Control', 'no-store')
-  return response
+    return NextResponse.json(data)
+  } else {
+    // Handle list of images request
+    const { data, error } = await supabase
+      .from('images')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('uploaded_at', { ascending: false })
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Generate signed URLs for each image
+    const imagesWithUrls = await Promise.all(data.map(async (image) => {
+      const { data: { signedUrl } } = await supabase
+        .storage
+        .from('images')
+        .createSignedUrl(image.file_path, 60 * 60) // URL valid for 1 hour
+
+      const { data: { signedUrl: thumbnailUrl } } = await supabase
+        .storage
+        .from('thumbnails')
+        .createSignedUrl(image.thumbnail_path, 60 * 60)
+
+      return { 
+        signedUrl, 
+        thumbnailUrl, 
+        id: image.id, 
+        file_name: image.file_name, 
+        uploaded_at: image.uploaded_at 
+      }
+    }))
+
+    const response = NextResponse.json(imagesWithUrls)
+    response.headers.set('Cache-Control', 'no-store')
+    return response
+  }
 }
 
 export async function POST(request) {
