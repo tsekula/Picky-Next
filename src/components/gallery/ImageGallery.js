@@ -3,14 +3,17 @@
 import { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react'
 import Image from 'next/image'
 import Masonry from 'react-masonry-css'
+import SearchBar from '../search/SearchBar'
+import ImageUpload from '../upload/ImageUpload'
 
-const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages }, ref) => {
+const ImageGallery = forwardRef(({ userId }, ref) => {
   const [images, setImages] = useState([])
   const [filteredImages, setFilteredImages] = useState([])
   const [isFiltered, setIsFiltered] = useState(false)
   const [error, setError] = useState(null)
   const [selectedImages, setSelectedImages] = useState([])
   const [lightboxImage, setLightboxImage] = useState(null)
+  const [showUpload, setShowUpload] = useState(false)
 
   const fetchImages = async () => {
     try {
@@ -46,7 +49,7 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages
         setFilteredImages(prevFiltered => prevFiltered.filter(img => !deletedIds.includes(img.id)));
         return updatedImages;
       });
-      setIsFiltered(false); // Reset the filter state
+      setIsFiltered(false);
     },
     filterImages: (searchResults) => {
       const filteredIds = new Set(searchResults.map(img => img.id))
@@ -59,15 +62,63 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages
     }
   }))
 
+  const handleUploadSuccess = async (newImages) => {
+    setImages(prevImages => [...newImages, ...prevImages]);
+    setShowUpload(false);
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedImages.length > 0) {
+      try {
+        const response = await fetch('/api/images/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageIds: selectedImages }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete images');
+        }
+
+        const result = await response.json();
+        console.log(result.message);
+
+        setImages(prevImages => prevImages.filter(img => !selectedImages.includes(img.id)));
+        setFilteredImages(prevFiltered => prevFiltered.filter(img => !selectedImages.includes(img.id)));
+        setSelectedImages([]);
+
+      } catch (error) {
+        console.error('Error deleting images:', error);
+        alert('Failed to delete images. Please try again later.');
+      }
+    }
+  };
+
+  const handleAnalyzeUnprocessed = async () => {
+    try {
+      const response = await fetch('/api/analysis/trigger', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to trigger analysis');
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+    } catch (error) {
+      console.error('Error triggering analysis:', error);
+    }
+  };
+
   const handleCheckboxChange = useCallback((imageId) => {
     setSelectedImages(prev => {
       const newSelection = prev.includes(imageId) 
         ? prev.filter(id => id !== imageId) 
         : [...prev, imageId]
-      onSelectionChange(newSelection)
       return newSelection
     })
-  }, [onSelectionChange])
+  }, [])
 
   const openLightbox = async (image) => {
     try {
@@ -85,6 +136,31 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages
 
   const closeLightbox = () => {
     setLightboxImage(null)
+  }
+
+  const handleSearch = async (query) => {
+    try {
+      if (query.trim() === '') {
+        handleSearchReset()
+      } else {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
+        if (!response.ok) {
+          throw new Error('Search failed')
+        }
+        const searchResults = await response.json()
+        const filteredIds = new Set(searchResults.map(img => img.id))
+        setFilteredImages(images.filter(img => filteredIds.has(img.id)))
+        setIsFiltered(true)
+      }
+    } catch (error) {
+      console.error('Error searching images:', error)
+      setError('Failed to search images. Please try again later.')
+    }
+  }
+
+  const handleSearchReset = () => {
+    setFilteredImages([])
+    setIsFiltered(false)
   }
 
   if (error) {
@@ -105,6 +181,48 @@ const ImageGallery = forwardRef(({ userId, onSelectionChange, images: propImages
 
   return (
     <>
+      <div className="bg-gray-100 p-4 mb-6">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex-grow mr-4">
+            <SearchBar onSearch={handleSearch} onReset={handleSearchReset} />
+          </div>
+          <button
+            onClick={() => setShowUpload(!showUpload)}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 rounded-full mr-2"
+            aria-label="Add Photos"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+          <button
+            onClick={handleDeleteSelected}
+            className={`p-2 rounded-full mr-2 ${
+              selectedImages.length > 0
+                ? 'bg-red-500 hover:bg-red-700 text-white'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+            disabled={selectedImages.length === 0}
+            aria-label="Delete Selected"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+          <button
+            onClick={handleAnalyzeUnprocessed}
+            className="p-2 rounded-full bg-purple-500 hover:bg-purple-700 text-white mr-2"
+            aria-label="Analyze Unprocessed Images"
+          >
+            🪄
+          </button>
+        </div>
+      </div>
+      {showUpload && (
+        <div className="mb-8">
+          <ImageUpload onUploadSuccess={handleUploadSuccess} />
+        </div>
+      )}
       <Masonry
         breakpointCols={breakpointColumnsObj}
         className="flex w-auto"
