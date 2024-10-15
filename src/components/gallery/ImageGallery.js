@@ -14,6 +14,7 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
   const [selectedImages, setSelectedImages] = useState([])
   const [lightboxImage, setLightboxImage] = useState(null)
   const [showUpload, setShowUpload] = useState(false)
+  const [totalImageCount, setTotalImageCount] = useState(null)  // Initialize to null
 
   const fetchImages = async () => {
     try {
@@ -26,6 +27,7 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
       setFilteredImages([])
       setIsFiltered(false)
       setSelectedImages([])
+      setTotalImageCount(data.length)  // Set the count after successful fetch
       return data
     } catch (error) {
       console.error('Error fetching images:', error)
@@ -35,7 +37,7 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
   }
 
   useEffect(() => {
-    fetchImages()
+    fetchImages()  // Call fetchImages when the component mounts
   }, [])
 
   useImperativeHandle(ref, () => ({
@@ -130,11 +132,11 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
       if (!response.ok) {
         throw new Error('Failed to fetch image details');
       }
-      const imageDetails = await response.json();
-      setLightboxImage({ ...image, ...imageDetails });
+      const fullImageData = await response.json();
+      setLightboxImage(fullImageData);
     } catch (error) {
-      console.error('Error fetching image details:', error);
-      setLightboxImage(image);
+      console.error('Error opening lightbox:', error);
+      // Handle error (e.g., show an error message to the user)
     }
   }
 
@@ -172,7 +174,7 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
   }
 
   if (images.length === 0) {
-    return <p className="text-center">No images yet! Upload some above!</p>
+    return <p className="text-center">Loading...</p>
   }
 
   const breakpointColumnsObj = {
@@ -188,7 +190,11 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
       <div className="bg-gray-100 p-4 mb-6">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex-grow mr-4">
-            <SearchBar onSearch={handleSearch} onReset={handleSearchReset} />
+            <SearchBar 
+              onSearch={handleSearch} 
+              onReset={handleSearchReset} 
+              imageCount={totalImageCount}
+            />
           </div>
           <button
             onClick={() => setShowUpload(!showUpload)}

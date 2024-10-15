@@ -26,6 +26,20 @@ export async function GET(request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Create signed URL only for single image request
+    try {
+      const { data: urlData, error: urlError } = await supabase
+        .storage
+        .from('images')
+        .createSignedUrl(data.file_path, 60 * 60) // URL valid for 1 hour
+
+      if (urlError) throw urlError;
+      data.signedUrl = urlData.signedUrl;
+    } catch (error) {
+      console.error(`Failed to create signed URL for image ${data.id}:`, error);
+      // You might want to log this error or handle it in some way
+    }
+
     return NextResponse.json(data)
   } else {
     // Handle list of images request
@@ -39,23 +53,18 @@ export async function GET(request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Generate signed URLs for full-size images and public URLs for thumbnails
-    const imagesWithUrls = await Promise.all(data.map(async (image) => {
-      const { data: { signedUrl } } = await supabase
-        .storage
-        .from('images')
-        .createSignedUrl(image.file_path, 60 * 60) // URL valid for 1 hour
-
+    // Only generate public URLs for thumbnails
+    const imagesWithUrls = data.map((image) => {
       const thumbnailUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/thumbnails/${image.thumbnail_path}`
 
       return { 
-        signedUrl, 
         thumbnailUrl, 
         id: image.id, 
         file_name: image.file_name, 
-        uploaded_at: image.uploaded_at 
+        uploaded_at: image.uploaded_at,
+        file_path: image.file_path // Include this for future use
       }
-    }))
+    })
 
     const response = NextResponse.json(imagesWithUrls)
     response.headers.set('Cache-Control', 'no-store')

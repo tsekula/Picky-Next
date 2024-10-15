@@ -24,13 +24,18 @@ export default function Gallery() {
     checkUser()
   }, [supabase, router])
 
+  useEffect(() => {
+    if (user && galleryRef.current) {
+      galleryRef.current.refreshGallery()
+    }
+  }, [user])
+
   if (!user) {
     return <div>Loading...</div>
   }
 
   return (
     <div className="flex flex-col min-h-screen">
-
       <main className="flex-grow">
         <ImageGallery 
           ref={galleryRef} 

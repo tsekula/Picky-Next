@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 
-export default function SearchBar({ onSearch, onReset }) {
+export default function SearchBar({ onSearch, onReset, imageCount }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchActive, setIsSearchActive] = useState(false)
 
@@ -24,6 +24,10 @@ export default function SearchBar({ onSearch, onReset }) {
     }
   }, [searchQuery])
 
+  const placeholderText = imageCount === null 
+    ? 'Loading images...' 
+    : `Search ${imageCount} images`
+
   return (
     <form onSubmit={handleSearch} className="relative">
       <div className="flex">
@@ -32,7 +36,7 @@ export default function SearchBar({ onSearch, onReset }) {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search images"
+            placeholder={placeholderText}
             className="w-full p-2 border rounded-l pr-8"
           />
           {isSearchActive && (
