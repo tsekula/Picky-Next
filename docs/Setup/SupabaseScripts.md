@@ -47,8 +47,6 @@ CREATE INDEX idx_images_analysis_status ON images(analysis_status);
 ## Create Functions
 
 ```sql
-CREATE EXTENSION IF NOT EXISTS vector;
-
 CREATE OR REPLACE FUNCTION match_images(
   query_embedding VECTOR(1536),
   match_threshold FLOAT,
