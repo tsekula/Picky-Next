@@ -98,7 +98,7 @@ CREATE POLICY "Only admins can delete user roles" ON user_roles FOR DELETE USING
 
 ```
 
-## Storage Policies
+## Create Storage Policies
 
 ```
 -- Policy for selecting (reading) files
