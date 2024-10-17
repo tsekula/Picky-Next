@@ -20,7 +20,7 @@ Picky was the use case I settled on. You can [check out the resulting slide deck
 ### Technical Concepts Explored
 - Using a IDE with integrated AI capabilities ([Cursor](https://www.cursor.com/)) to create, refactor, and troubleshoot code
 - Using a LLM (Claude 3.5 Sonnet) to generate various artifacts through the project, e.g. project plans, architectural design, code, documentation
-- Using a LLM (GPT-4o) + accompanying prompt engineering for the computer vision tasks needed to analyze images
+- Using a LLM (GPT-4o) + accompanying [prompt engineering](https://github.com/tsekula/Picky-Next/blob/d57eb9622668c8cd7b0b9adb543af348102abc4a/src/config/llmconfig.js) for the computer vision tasks needed to analyze images
 - Using a LLM (OpenAI) for generating embeddings for semantic search
 - Using a vector database (pgvector in Supabase) for storing and querying embeddings
 
