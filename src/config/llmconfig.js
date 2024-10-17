@@ -12,6 +12,7 @@ export const imageAnalysisImageMaxLongEdge = 1536;
 // # of tokens in the results
 export const imageAnalysisResultsMaxTokens = 500; 
 
+// Prompt for image analysis sent to the LLM
 export const imageAnalysisPrompt = `
 Analyze this image and provide the following information:
 1) Objects detected (including text, inanimate objects, people, landmarks),
@@ -21,6 +22,7 @@ Does not use unnecessary words such as "this image shows" or "the image is about
 Use clauses instead of sentences.
 `;
 
+// Schema for image analysis returned by the LLM
 export const imageAnalysisSchema = {
   name: "image_analysis",
   strict: true,
