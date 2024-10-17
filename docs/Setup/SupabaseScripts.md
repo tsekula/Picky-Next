@@ -97,3 +97,55 @@ CREATE POLICY "Only admins can update user roles" ON user_roles FOR UPDATE USING
 CREATE POLICY "Only admins can delete user roles" ON user_roles FOR DELETE USING (EXISTS (SELECT 1 FROM user_roles WHERE user_id = auth.uid() AND is_admin = true));
 
 ```
+
+## Storage Policies
+
+```
+-- Policy for selecting (reading) files
+CREATE POLICY "Users can view their own images"
+ON storage.objects FOR SELECT
+USING (
+  auth.uid() = owner
+  AND bucket_id = 'images'
+);
+
+-- Policy for inserting (uploading) files
+CREATE POLICY "Users can upload their own images"
+ON storage.objects FOR INSERT
+WITH CHECK (
+  auth.uid() = owner
+  AND bucket_id = 'images'
+);
+
+-- Policy for deleting files
+CREATE POLICY "Users can delete their own images"
+ON storage.objects FOR DELETE
+USING (
+  auth.uid() = owner
+  AND bucket_id = 'images'
+);
+
+-- Policy for selecting (reading) thumbnail files
+CREATE POLICY "Users can view their own thumbnails"
+ON storage.objects FOR SELECT
+USING (
+  auth.uid() = owner
+  AND bucket_id = 'thumbnails'
+);
+
+-- Policy for inserting (uploading) thumbnail files
+CREATE POLICY "Users can upload their own thumbnails"
+ON storage.objects FOR INSERT
+WITH CHECK (
+  auth.uid() = owner
+  AND bucket_id = 'thumbnails'
+);
+
+-- Policy for deleting thumbnail files
+CREATE POLICY "Users can delete their own thumbnails"
+ON storage.objects FOR DELETE
+USING (
+  auth.uid() = owner
+  AND bucket_id = 'thumbnails'
+);
+```

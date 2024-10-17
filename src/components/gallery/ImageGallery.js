@@ -169,13 +169,59 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
     setIsFiltered(false)
   }
 
+  const renderControlBar = () => (
+    <div className="bg-gray-100 p-4 mb-6">
+      <div className="container mx-auto flex items-center justify-between">
+        <div className="flex-grow mr-4">
+          <SearchBar 
+            onSearch={handleSearch} 
+            onReset={handleSearchReset} 
+            imageCount={totalImageCount}
+          />
+        </div>
+        <button
+          onClick={() => setShowUpload(!showUpload)}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 rounded-full mr-2"
+          aria-label="Add Photos"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+        <button
+          onClick={handleDeleteSelected}
+          className={`p-2 rounded-full mr-2 ${
+            selectedImages.length > 0
+              ? 'bg-red-500 hover:bg-red-700 text-white'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+          disabled={selectedImages.length === 0}
+          aria-label="Delete Selected"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+        <button
+          onClick={handleAnalyzeUnprocessed}
+          className="p-2 rounded-full bg-purple-500 hover:bg-purple-700 text-white mr-2"
+          aria-label="Analyze Unprocessed Images"
+        >
+          🪄
+        </button>
+      </div>
+    </div>
+  )
+
   if (error) {
-    return <p className="text-center text-red-500">{error}</p>
+    return (
+      <>
+        {renderControlBar()}
+        <p className="text-center text-red-500">{error}</p>
+      </>
+    )
   }
 
-  if (images.length === 0) {
-    return <p className="text-center">Loading...</p>
-  }
 
   const breakpointColumnsObj = {
     default: 4,
@@ -187,84 +233,48 @@ const ImageGallery = forwardRef(({ userId }, ref) => {
 
   return (
     <>
-      <div className="bg-gray-100 p-4 mb-6">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex-grow mr-4">
-            <SearchBar 
-              onSearch={handleSearch} 
-              onReset={handleSearchReset} 
-              imageCount={totalImageCount}
-            />
-          </div>
-          <button
-            onClick={() => setShowUpload(!showUpload)}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 rounded-full mr-2"
-            aria-label="Add Photos"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
-          <button
-            onClick={handleDeleteSelected}
-            className={`p-2 rounded-full mr-2 ${
-              selectedImages.length > 0
-                ? 'bg-red-500 hover:bg-red-700 text-white'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-            disabled={selectedImages.length === 0}
-            aria-label="Delete Selected"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
-          <button
-            onClick={handleAnalyzeUnprocessed}
-            className="p-2 rounded-full bg-purple-500 hover:bg-purple-700 text-white mr-2"
-            aria-label="Analyze Unprocessed Images"
-          >
-            🪄
-          </button>
-        </div>
-      </div>
+      {renderControlBar()}
       {showUpload && (
         <div className="mb-8">
           <ImageUpload onUploadSuccess={handleUploadSuccess} />
         </div>
       )}
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className="flex w-auto"
-        columnClassName="bg-clip-padding"
-        style={{ margin: '0 -2px' }}
-      >
-        {(isFiltered ? filteredImages : images).map((image) => (
-          <div key={image.id} className="mb-4 relative group" style={{ padding: '0 4px' }}>
-            <Image
-              className="w-full rounded-sm object-cover object-center cursor-pointer transition-all duration-300 group-hover:opacity-75"
-              src={image.thumbnailUrl}
-              alt={image.file_name}
-              width={500}
-              height={500}
-              loading="lazy"
-              onClick={() => openLightbox(image)}
-              priority={false}
-              unoptimized={false}
-            />
-            <div className={`absolute top-2 left-2 z-10 transition-opacity duration-300 ${
-              selectedImages.includes(image.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            }`}>
-              <input
-                type="checkbox"
-                checked={selectedImages.includes(image.id)}
-                onChange={() => handleCheckboxChange(image.id)}
-                className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out bg-white bg-opacity-75 rounded"
+      {images.length === 0 ? (
+        <p className="text-center">No images available.</p>
+      ) : (
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className="flex w-auto"
+          columnClassName="bg-clip-padding"
+          style={{ margin: '0 -2px' }}
+        >
+          {(isFiltered ? filteredImages : images).map((image) => (
+            <div key={image.id} className="mb-4 relative group" style={{ padding: '0 4px' }}>
+              <Image
+                className="w-full rounded-sm object-cover object-center cursor-pointer transition-all duration-300 group-hover:opacity-75"
+                src={image.thumbnailUrl}
+                alt={image.file_name}
+                width={500}
+                height={500}
+                loading="lazy"
+                onClick={() => openLightbox(image)}
+                priority={false}
+                unoptimized={false}
               />
+              <div className={`absolute top-2 left-2 z-10 transition-opacity duration-300 ${
+                selectedImages.includes(image.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              }`}>
+                <input
+                  type="checkbox"
+                  checked={selectedImages.includes(image.id)}
+                  onChange={() => handleCheckboxChange(image.id)}
+                  className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out bg-white bg-opacity-75 rounded"
+                />
+              </div>
             </div>
-          </div>
-        ))}
-      </Masonry>
+          ))}
+        </Masonry>
+      )}
 
       {lightboxImage && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={closeLightbox}>
