@@ -1,4 +1,4 @@
-# 🖼️ Picky: AI-Powered Image Gallery
+# 🖼️ Picky: An Image Gallery written 100% with AI
 
 ![Picky Screenshot](https://github.com/tsekula/Picky-Next/blob/master/public/images/Picky%20Screenshot.jpg)
 ## 🌟 Project Overview
