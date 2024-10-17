@@ -78,6 +78,15 @@ Pre-requisites:
    4. **Create the indexes:** In the same text editor window, delete the existing text. Copy-and-paste the script from the ['Create Indexes' section of this page](https://github.com/tsekula/Picky-Next/blob/master/docs/Setup/SupabaseScripts.md#create-indexes). Run the script. You should see a `Success. No rows returned` message confirming the action.
    5. **Create the match function:** In the same text editor window, delete the existing text. Copy-and-paste the script from the ['Create Functions' section of this page](https://github.com/tsekula/Picky-Next/blob/master/docs/Setup/SupabaseScripts.md#create-functions). Run the script. You should see a `Success. No rows returned` message confirming the action.
    6. **Create the Row Level Security (RLS) policies:** In the same text editor window, delete the existing text. Copy-and-paste the script from the ['Create RLS Policies' section of this page](https://github.com/tsekula/Picky-Next/blob/master/docs/Setup/SupabaseScripts.md#create-rls-policies). Run the script. You should see a `Success. No rows returned` message confirming the action.
+7. Setup the Supabase storage
+   1. From the [Supabase dashboard](https://supabase.com/dashboard/projects) for your project click on '_Storage_' in the left nav bar.
+   2. In the upper-left, click the '_New Bucket_' button and enter '_images_' as the name of the bucket. Click '_Save_'
+   3. Create another bucket named 'thumbnails', **important:** set this bucket to 'Public bucket'!
+8. Setup your image gallery sign-in account in Supabase
+   1. From the [Supabase dashboard](https://supabase.com/dashboard/projects) for your project click on '_Authentication_' in the left nav bar.
+   2. On the '_Users_' screen, click the green '_Add user_' button on the far right, then '_Create new user_'. Enter an email address and password that you will use to login to your image gallery.  Click '_Create User_'.
+   3. In the left nav bar click '_Table Editor_', then click on the '_user_roles_' table name. Click the green '_Insert_' button, then '_Insert row_'. For the 'user_id' field, click '_Select record_', then in the pop-up choose the 1 and only record shown. Set '_can_upload_' to `TRUE`. Click '_Save_'.
+
 
 First, run the development server:
 
