@@ -42,7 +42,6 @@ Picky is an online image gallery designed to manage and search through a user's 
 
 9. ~**User Account Management**: Users can manage their account settings, update profile information, and control privacy settings.~
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 
@@ -75,7 +74,7 @@ Pre-requisites:
    1. From the [Supabase dashboard](https://supabase.com/dashboard/projects) for your project click on '_Storage_' in the left nav bar.
    2. In the upper-left, click the '_New Bucket_' button and enter '_images_' as the name of the bucket. Click '_Save_'
    3. Create another bucket named '_thumbnails_', **important:** set this bucket to 'Public bucket'!
-7. Setup the Supabase database.
+7. Set up the Supabase database.
    1. From the [Supabase dashboard](https://supabase.com/dashboard/projects) for your project click on '_SQL Editor_' in the left nav bar
    2. In the upper-left, next to the '_Search queries..._' input box, click the '+' symbol and then click '_Create a new snippet_'.
    3. **Create the tables:** In the text editor window, copy-and-paste the script from the ['Create Tables' section of this page](https://github.com/tsekula/Picky-Next/blob/master/docs/Setup/SupabaseScripts.md#create-tables). Click the green 'Run' button to execute the script. You should see a `Success. No rows returned` message confirming the action.
