@@ -1,7 +1,7 @@
 # Picky: AI-Powered Image Gallery
 
 ## Project Overview
-![Picky Screenshot](https://github.com/tsekula/Picky-Next/blob/master/docs/Picky%20Screenshot.jpg)
+![Picky Screenshot](https://github.com/tsekula/Picky-Next/blob/master/public/images/Picky%20Screenshot.jpg)
 Picky is an online image gallery designed to manage and search through a user's extensive library of digital photos. The app's unique selling point is its ability to search and filter images based on natural language queries, including the names of people in the images. Picky delivers relevant images quickly and accurately by leveraging a combination of advanced concepts and AI tools, such as machine vision, vector or graph databases, and Large Language Models (LLMs). Each user has their own private account and gallery, ensuring a personalized and secure experience.
 
 ## Tech Stack
