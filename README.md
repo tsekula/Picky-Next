@@ -87,42 +87,18 @@ Pre-requisites:
    1. From the [Supabase dashboard](https://supabase.com/dashboard/projects) for your project click on '_Authentication_' in the left nav bar.
    2. On the '_Users_' screen, click the green '_Add user_' button on the far right, then '_Create new user_'. Enter an email address and password that you will use to login to your image gallery.  Click '_Create User_'.
    3. In the left nav bar click '_Table Editor_', then click on the '_user_roles_' table name. Click the green '_Insert_' button, then '_Insert row_'. For the 'user_id' field, click '_Select record_', then in the pop-up choose the 1 and only record shown. Set '_can_upload_' to `TRUE`. Click '_Save_'.
-9. Create and ddd your OpenAI API key.
+9. Add your OpenAI API key
    1. Create a new API key via [the OpenAI dashboard](https://platform.openai.com/api-keys). Make sure permissions are set to 'All'.
-   2. copy-and-paste the new API key into your local `/.env` file and save:
-   ```
-   OPENAI_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXX
-   ```
-
-First, run the development server:
+   2. Copy-and-paste the new API key into your local `/.env` file and save:
+      ```
+      OPENAI_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXX
+      ```
+### Launching the app
+To start the app's backend server, run this command:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
