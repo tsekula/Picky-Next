@@ -28,7 +28,7 @@ Picky was the use case I settled on. You can [check out the resulting slide deck
 - Next.js full-stack app with Tailwind CSS
 - Supabase with pgvector
 
-## Key Features of Picky
+### Key Features of Picky
 The full scope is shown below, but time constraints limited what I was able to implement.
 
 1. **User Authentication**: Users can sign up, log in, and reset their passwords. Each user has their own private gallery.
@@ -118,3 +118,15 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### Using the app
+Upon launching the app, you will be redirected to the login page. Use the 'sign-in account' you created in the setup steps above to log in.
+
+Once logged in, you'll see the image gallery. By default it will be empty, so you'll need to upload some images. Click on the '+' button in the nav and the upload area will appear.  You can use it to upload 1 or more images at once.
+
+After uploading images, the gallery will refresh to display the newly uploaded images.  You can click any image to see a larger version, along with the current metadata.  **Important:** Only basic info about the image (name, date uploaded, file type) will appear at this point.
+
+To perform the full computer vision analysis, you have to manually trigger it. Click on the purple 🪄 button to initiate the analysis of _all unprocessed images_. This analysis will take 2-10 seconds for each 1 image, so be patient. There is no indicator that the analysis is complete 😳 (I just didn't implement it -- sorry).  You can go check the 'images' table in Supabase to see the status for each image change '_unprocessed_' -> '_pending_' -> '_complete_'.
+
+To check the result of the computer vision analysis, click on an image to see a larger version. The metadata will be updated with the results of the computer vision analysis.
+
+Now you can conduct a semantic search. Enter a search query in the text box and click 'Search' to see a filtered list of images that match the search query.  Click the 'X' to reset the search.
