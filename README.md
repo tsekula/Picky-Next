@@ -1,18 +1,33 @@
 # Picky: AI-Powered Image Gallery
 
-## Project Overview
 ![Picky Screenshot](https://github.com/tsekula/Picky-Next/blob/master/public/images/Picky%20Screenshot.jpg)
+## Project Overview
+### What is Picky?
 Picky is an online image gallery designed to manage and search through a user's extensive library of digital photos. The app's unique selling point is its ability to search and filter images based on natural language queries, including the names of people in the images. Picky delivers relevant images quickly and accurately by leveraging a combination of advanced concepts and AI tools, such as machine vision, vector or graph databases, and Large Language Models (LLMs). Each user has their own private account and gallery, ensuring a personalized and secure experience.
-
+### Why was Picky built?
+I wanted to give a talk to my local AI meetup group about using AI at every step of the development process. For this talk, I created this challenge:
+- Go from an idea to a running, end-to-end proof-of-concept
+- Use AI-assisted tools from conception to delivery
+- Use modern technologies that I am NOT familiar with:
+  - Full-stack Next.js project
+  - IDE with AI capabilities
+  - Vector database
+- Document the process along the way
+- Do this in ~1 week
+Picky was the use case I settled on. You can [check out the resulting slide deck I presented](https://docs.google.com/presentation/d/1ojmVBc2vzR_AOz46Da5bqfTFf-okOvVnIIPGR74M_rg/edit?usp=sharing).
 ## Tech Stack
-
-### Front-end and Back-end
-- Next.js full-stack app
-- Tailwind CSS
+- Next.js full-stack app with Tailwind CSS
 - Supabase with pgvector
-- OPenAI ChatGPT API
+- OpenAI ChatGPT API
+## Technical Concepts Explored
+- Using a IDE with integrated AI capabilities (Cursor) to create, refactor, and troubleshoot code
+- Using a LLM (Claude 3.5 Sonnet) to generate various artifacts through the project, e.g. project plans, architectural design, code, documentation
+- Using a LLM (GPT-4o) + accompanying prompt engineering for the computer vision tasks needed to analyze images
+- Using a LLM (OpenAI) for generating embeddings for semantic search
+- Using a vector database (pgvector in Supabase) for storing and querying embeddings
 
-## Key Features
+## Key Features of Picky
+The full scope is shown below, but time constraints limited what I was able to implement.
 
 1. **User Authentication**: Users can sign up, log in, and reset their passwords. Each user has their own private gallery.
 
