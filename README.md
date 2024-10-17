@@ -46,7 +46,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-### Local installation
+### Installing the app locally
 Pre-requisites:
 - [Git installed locally](https://github.com/git-guides/install-git)
 - [Node.js + NPM installed on your local machine](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm#using-a-node-installer-to-install-nodejs-and-npm)
