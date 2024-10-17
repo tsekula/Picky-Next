@@ -13,7 +13,7 @@ I wanted to give a talk to [my local AI meetup group](https://www.meetup.com/hei
   - Full-stack Next.js project
   - IDE with AI capabilities
   - Vector database
-- **Not write a single line of code!!!**🤯
+- **_Not write a single line of code!!!_** 🤯
 - Document the process along the way
 - Do this in ~1 week
 
