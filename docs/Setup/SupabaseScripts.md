@@ -1,7 +1,8 @@
 ## Create Tables
 
 ```sql
--- Users table (managed by Supabase Auth, no need to create)
+-- Setup pgvector extension first
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Images table
 CREATE TABLE images (
@@ -31,6 +32,7 @@ CREATE TABLE user_roles (
   is_admin BOOLEAN DEFAULT false
 );
 
+
 ```
 
 ## Create Indexes
@@ -40,7 +42,7 @@ CREATE TABLE user_roles (
 CREATE INDEX idx_images_user_id ON images(user_id);
 CREATE INDEX idx_images_embedding ON images USING ivfflat (embedding vector_cosine_ops);
 CREATE INDEX idx_images_analysis_status ON images(analysis_status);
-
+```
 
 ## Create Functions
 
