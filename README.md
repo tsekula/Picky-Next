@@ -46,6 +46,39 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
+### Local installation
+Pre-requisites:
+- [Git installed locally](https://github.com/git-guides/install-git)
+- [Node.js + NPM installed on your local machine](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm#using-a-node-installer-to-install-nodejs-and-npm)
+- [A free Supabase account](https://supabase.com)
+- [An OpenAI account](https://platform.openai.com/)
+
+1. Create a new base directory for your code projects, e.g. 'Code'.
+2. From a terminal go into that 'Code' directory and pull down the code via
+   ```
+   git clone https://github.com/tsekula/Picky-Next.git
+   ```
+   This will create a new sub-directory named 'Picky-Next'.
+4. Go into that 'Picky-Next' directory and install the app + its dependencies by running this command:
+   ```
+   npm install
+   ```
+5. Create a new Supabase project by following the steps at [https://database.new/](https://database.new/). Name the project `Picky`.
+
+   While it's setting up the project, copy-and-paste these values into your local `/.env` file:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=XXXXXXXXX     // 'Project URL' in Supabase
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=XXXXXX   // 'anon public' Project API Keys in Supabase
+   ```
+   You can find these values via the '_Project Settings_' -> '_API_' section in the [Supabase dashboard](https://supabase.com/dashboard/projects) for your project
+6. Setup the Supabase database.
+   1. From the [Supabase dashboard](https://supabase.com/dashboard/projects) for your project click on '_SQL Editor_' in the left nav bar
+   2. In the upper-left, next to the '_Search queries..._' input box, click the '+' symbol and then click '_Create a new snippet_'.
+   3. **Create the tables:** In the text editor window, copy-and-paste the script from the ['Create Tables' section of this page](https://github.com/tsekula/Picky-Next/blob/master/docs/Setup/SupabaseScripts.md#create-tables). Click the green 'Run' button to execute the script. You should see a `Success. No rows returned` message confirming the action.
+   4. **Create the indexes:** In the same text editor window, delete the existing text. Copy-and-paste the script from the ['Create Indexes' section of this page](https://github.com/tsekula/Picky-Next/blob/master/docs/Setup/SupabaseScripts.md#create-indexes). Run the script. You should see a `Success. No rows returned` message confirming the action.
+   5. **Create the match function:** In the same text editor window, delete the existing text. Copy-and-paste the script from the ['Create Functions' section of this page](https://github.com/tsekula/Picky-Next/blob/master/docs/Setup/SupabaseScripts.md#create-functions). Run the script. You should see a `Success. No rows returned` message confirming the action.
+   6. **Create the Row Level Security (RLS) policies:** In the same text editor window, delete the existing text. Copy-and-paste the script from the ['Create RLS Policies' section of this page](https://github.com/tsekula/Picky-Next/blob/master/docs/Setup/SupabaseScripts.md#create-rls-policies). Run the script. You should see a `Success. No rows returned` message confirming the action.
+
 First, run the development server:
 
 ```bash
