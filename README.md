@@ -94,7 +94,7 @@ Pre-requisites:
       OPENAI_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXX
       ```
 ### Launching the app
-To start the app's backend server, run this command:
+To start the app's backend server, run this command from the /Picky-Next folder:
 
 ```bash
 npm run dev
