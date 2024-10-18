@@ -1,21 +1,22 @@
 # 🖼️ Picky: An Image Gallery written 100% with AI
 
-![Picky Screenshot](https://github.com/tsekula/Picky-Next/blob/master/public/images/Picky%20Screenshot.jpg)
+![Picky Screenshot Search Results](https://github.com/tsekula/Picky-Next/blob/2c8d38d2d83a75bffded4a5d4983ab6512ef9d66/public/images/Screenshot%20Search.jpg)
+![Picky Screenshot Image Details](https://github.com/tsekula/Picky-Next/blob/2c8d38d2d83a75bffded4a5d4983ab6512ef9d66/public/images/Screenshot%20Image%20Details.jpg)
 ## 🌟 Project Overview
 
 ### 🤔 What is Picky?
 Picky is an online image gallery designed to manage and search through a user's extensive library of digital photos. The app's unique selling point is its ability to search and filter images based on natural language queries, including the names of people in the images. Picky delivers relevant images quickly and accurately by leveraging a combination of advanced concepts and AI tools, such as machine vision, vector or graph databases, and Large Language Models (LLMs). Each user has their own private account and gallery, ensuring a personalized and secure experience.
 ### 🎯 Why was Picky built?
 I wanted to give a talk to [my local AI meetup group](https://www.meetup.com/heidelberg-ai-community/) about using AI at every step of the development process. For this talk, I created this challenge:
-- Go from an idea to a running, end-to-end proof-of-concept
 - Use AI-assisted tools from conception to delivery
+- Go from a basic idea to a running, end-to-end proof-of-concept
+- **_Not write a single line of code!!!_** 🤯
 - Use modern technologies that I am NOT familiar with:
   - Full-stack Next.js project
   - IDE with AI capabilities
   - Vector database
-- **_Not write a single line of code!!!_** 🤯
 - Document the process along the way
-- Do this in ~1 week
+- Do all of this in ~1 week
 
 Picky was the use case I settled on. You can [check out the resulting slide deck I presented](https://docs.google.com/presentation/d/1ojmVBc2vzR_AOz46Da5bqfTFf-okOvVnIIPGR74M_rg/edit?usp=sharing).
 
